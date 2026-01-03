@@ -1,13 +1,43 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Existing selectors...
+    const desktopIconsContainer = document.getElementById('desktop-icons');
+
+    // --- Function to dynamically load installed apps ---
+    const loadInstalledApps = () => {
+        fetch('api/get_installed_apps.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.apps) {
+                    data.apps.forEach(app => {
+                        const iconElement = document.createElement('div');
+                        iconElement.className = 'desktop-icon';
+                        // Use run_app.php as the URL source
+                        iconElement.dataset.appUrl = `run_app.php?id=${app.id}`;
+
+                        iconElement.innerHTML = `
+                            <div class="icon-placeholder">${app.icon || '📦'}</div>
+                            <span>${app.name}</span>
+                        `;
+                        desktopIconsContainer.appendChild(iconElement);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Failed to load installed apps:", error);
+            });
+    };
+
+    // --- Initial Load ---
+    loadInstalledApps();
+
+    // --- All other existing JS code for window management, etc. ---
     const startButton = document.getElementById('start-button');
     const startMenu = document.getElementById('start-menu');
     const windowsContainer = document.getElementById('windows-container');
-    const desktopIcons = document.getElementById('desktop-icons');
     const taskbarWindowList = document.getElementById('open-windows-list');
     const hudTime = document.getElementById('hud-time');
     const hudDate = document.getElementById('hud-date');
 
-    // --- Start Menu Logic ---
     startButton.addEventListener('click', (e) => {
         e.stopPropagation();
         startMenu.classList.toggle('open');
@@ -15,11 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', () => startMenu.classList.remove('open'));
     startMenu.addEventListener('click', (e) => e.stopPropagation());
 
-    // --- Window Management Logic ---
     let zIndexCounter = 100;
     const openWindows = {};
 
-    // Make createWindow a global function to be accessible by guest mode override
     window.createWindow = (url, title) => {
         const windowId = `window-${Date.now()}`;
         zIndexCounter++;
@@ -43,33 +71,29 @@ document.addEventListener('DOMContentLoaded', () => {
         windowsContainer.appendChild(windowElement);
         openWindows[windowId] = windowElement;
 
-        // Add to taskbar
         const taskbarItem = document.createElement('div');
         taskbarItem.className = 'taskbar-item';
         taskbarItem.textContent = title;
         taskbarItem.dataset.windowId = windowId;
         taskbarWindowList.appendChild(taskbarItem);
 
-        // --- Event Listeners for Window ---
         setupWindowEvents(windowElement, taskbarItem);
     };
 
     const setupWindowEvents = (win, taskbarItem) => {
         const titleBar = win.querySelector('.window-title-bar');
 
-        // Focus window on click
         win.addEventListener('click', () => {
             win.style.zIndex = ++zIndexCounter;
         });
 
-        // Dragging
         let isDragging = false;
         let offsetX, offsetY;
         titleBar.addEventListener('mousedown', (e) => {
             isDragging = true;
             offsetX = e.clientX - win.offsetLeft;
             offsetY = e.clientY - win.offsetTop;
-            win.style.zIndex = ++zIndexCounter; // Bring to front
+            win.style.zIndex = ++zIndexCounter;
         });
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
@@ -81,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
             isDragging = false;
         });
 
-        // Controls
         win.querySelector('.close').addEventListener('click', () => {
             win.remove();
             taskbarItem.remove();
@@ -92,52 +115,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         win.querySelector('.maximize').addEventListener('click', () => {
             if (win.classList.contains('maximized')) {
-                // Restore
                 win.classList.remove('maximized');
                 win.style.top = win.dataset.originalTop;
                 win.style.left = win.dataset.originalLeft;
                 win.style.width = win.dataset.originalWidth;
                 win.style.height = win.dataset.originalHeight;
             } else {
-                // Maximize
                 win.classList.add('maximized');
-                // Save original dimensions and position
                 win.dataset.originalTop = win.style.top;
                 win.dataset.originalLeft = win.style.left;
                 win.dataset.originalWidth = win.style.width;
                 win.dataset.originalHeight = win.style.height;
-                // Apply maximized styles
                 win.style.top = '0';
                 win.style.left = '0';
                 win.style.width = '100%';
-                win.style.height = 'calc(100vh - 40px)'; // Full viewport height minus taskbar
+                win.style.height = 'calc(100vh - 40px)';
             }
         });
 
-        // Taskbar interaction
         taskbarItem.addEventListener('click', () => {
-            win.style.display = 'block'; // Show if minimized
-            win.style.zIndex = ++zIndexCounter; // Bring to front
+            win.style.display = 'block';
+            win.style.zIndex = ++zIndexCounter;
         });
     };
 
-    // --- Universal Click Handler for Apps ---
     const appLaunchHandler = (e) => {
         const target = e.target.closest('[data-app-url]');
         if (target) {
             e.preventDefault();
             const url = target.dataset.appUrl;
-            // Try to find a title from a span, or fallback to the element's text content
             const title = target.querySelector('span')?.innerText || target.innerText;
             createWindow(url, title);
         }
     };
 
-    desktopIcons.addEventListener('click', appLaunchHandler);
+    desktopIconsContainer.addEventListener('click', appLaunchHandler);
     startMenu.addEventListener('click', appLaunchHandler);
     document.getElementById('hud-widget').addEventListener('click', appLaunchHandler);
 
-    // --- HUD Widget Logic ---
     const updateTime = () => {
         const now = new Date();
         hudTime.textContent = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
