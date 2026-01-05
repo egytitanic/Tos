@@ -37,6 +37,14 @@ $userName = $_SESSION['user_name'];
             <div class="icon-placeholder">💻</div>
             <span>متجر الأجهزة</span>
         </div>
+        <div class="desktop-icon" data-app-url="dashboard.php">
+            <div class="icon-placeholder">📊</div>
+            <span>لوحة التحكم</span>
+        </div>
+        <div class="desktop-icon" data-app-url="profile.php">
+            <div class="icon-placeholder">👤</div>
+            <span>ملفي الشخصي</span>
+        </div>
         <!-- User-specific icons will be loaded here -->
     </div>
 
