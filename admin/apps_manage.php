@@ -46,8 +46,25 @@ $apps = $stmt->fetchAll();
             text-decoration: none;
             color: #007bff;
         }
-        .actions a.delete {
+        .actions a.delete, .delete-btn {
             color: #dc3545;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            font: inherit;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .add-new-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -67,6 +84,8 @@ $apps = $stmt->fetchAll();
         </div>
         <div class="main-content">
             <h1>إدارة التطبيقات</h1>
+
+            <a href="app_edit.php" class="add-new-btn">إضافة تطبيق جديد</a>
 
             <table class="manage-table">
                 <thead>
@@ -90,8 +109,11 @@ $apps = $stmt->fetchAll();
                         <td>$<?php echo number_format($app['price_monthly'], 2); ?></td>
                         <td><?php echo $app['is_active'] ? 'نشط' : 'معطل'; ?></td>
                         <td class="actions">
-                            <a href="#">تعديل</a>
-                            <a href="#" class="delete">حذف</a>
+                            <a href="app_edit.php?id=<?php echo $app['id']; ?>">تعديل</a>
+                            <form action="app_handler.php" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من رغبتك في حذف هذا التطبيق؟');">
+                                <input type="hidden" name="id" value="<?php echo $app['id']; ?>">
+                                <button type="submit" name="delete_app" class="delete-btn">حذف</button>
+                            </form>
                         </td>
                     </tr>
                     <?php endforeach; ?>
