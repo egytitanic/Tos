@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Existing selectors...
     const desktopIconsContainer = document.getElementById('desktop-icons');
+    const mostUsedList = document.getElementById('most-used-apps');
 
     // --- Function to dynamically load installed apps ---
     const loadInstalledApps = () => {
@@ -27,10 +28,65 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     };
 
-    // --- Initial Load ---
+    // --- Function to load most used apps ---
+    const loadMostUsedApps = () => {
+        if (!mostUsedList) return;
+
+        fetch('/api/most_used_apps.php')
+            .then(response => response.json())
+            .then(apps => {
+                mostUsedList.innerHTML = ''; // Clear existing items
+                if (apps.error) {
+                    console.error(apps.error);
+                    return;
+                }
+                if (apps.length === 0) {
+                    mostUsedList.innerHTML = '<li>لا توجد بيانات استخدام بعد.</li>';
+                    return;
+                }
+                apps.forEach(app => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = '#';
+                    a.textContent = app.name;
+                    a.setAttribute('data-app-url', `run_app.php?id=${app.id}`);
+                    li.appendChild(a);
+                    mostUsedList.appendChild(li);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching most used apps:', error);
+                mostUsedList.innerHTML = '<li>فشل تحميل التطبيقات.</li>';
+            });
+    };
+
+    // --- Function to update notification badge ---
+    const updateNotificationBadge = () => {
+        const notificationsIcon = document.getElementById('notifications-icon');
+        if (!notificationsIcon) return;
+
+        fetch('/api/notifications_count.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.unread_count > 0) {
+                    notificationsIcon.setAttribute('data-count', data.unread_count);
+                    notificationsIcon.classList.add('has-notifications');
+                } else {
+                    notificationsIcon.removeAttribute('data-count');
+                    notificationsIcon.classList.remove('has-notifications');
+                }
+            })
+            .catch(error => console.error('Error fetching notification count:', error));
+    };
+
+    // --- Initial Load & Periodic Updates ---
     loadInstalledApps();
+    loadMostUsedApps();
+    updateNotificationBadge();
+    setInterval(updateNotificationBadge, 30000); // Update every 30 seconds
 
     // --- All other existing JS code for window management, etc. ---
+    // ... (rest of the code is the same)
     const startButton = document.getElementById('start-button');
     const startMenu = document.getElementById('start-menu');
     const windowsContainer = document.getElementById('windows-container');

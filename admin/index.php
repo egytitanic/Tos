@@ -31,10 +31,10 @@ $total_subscriptions = $pdo->query("SELECT COUNT(*) FROM subscriptions WHERE sta
             <ul>
                 <li><a href="index.php" class="active">لوحة التحكم</a></li>
                 <li><a href="apps_manage.php">إدارة التطبيقات</a></li>
-                <li><a href="#">إدارة المنتجات</a></li>
-                <li><a href="#">إدارة الإشعارات</a></li>
-                <li><a href="#">عرض الاشتراكات</a></li>
-                <li><a href="#">عرض الطلبات</a></li>
+                <li><a href="products_manage.php">إدارة المنتجات</a></li>
+                <li><a href="notifications_manage.php">إدارة الإشعارات</a></li>
+                <li><a href="subscriptions_manage.php">عرض الاشتراكات</a></li>
+                <li><a href="orders_manage.php">عرض الطلبات</a></li>
                 <li><a href="../index.php">العودة للنظام</a></li>
             </ul>
         </div>

@@ -5,6 +5,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION[
     exit;
 }
 require_once '../core/db.php';
+require_once '../core/csrf.php';
 
 $app_id = $_GET['id'] ?? null;
 $is_edit_mode = !is_null($app_id);
@@ -77,13 +78,18 @@ if ($is_edit_mode) {
             <ul>
                 <li><a href="index.php">لوحة التحكم</a></li>
                 <li><a href="apps_manage.php" class="active">إدارة التطبيقات</a></li>
-                <!-- other links -->
+                <li><a href="products_manage.php">إدارة المنتجات</a></li>
+                <li><a href="notifications_manage.php">إدارة الإشعارات</a></li>
+                <li><a href="subscriptions_manage.php">عرض الاشتراكات</a></li>
+                <li><a href="orders_manage.php">عرض الطلبات</a></li>
+                <li><a href="../index.php">العودة للنظام</a></li>
             </ul>
         </div>
         <div class="main-content">
             <h1><?php echo $page_title; ?></h1>
             <div class="form-container">
                 <form id="appForm" action="app_handler.php" method="POST">
+                    <?php csrf_input_field(); ?>
                     <input type="hidden" name="id" value="<?php echo htmlspecialchars($app['id']); ?>">
 
                     <div class="form-group">

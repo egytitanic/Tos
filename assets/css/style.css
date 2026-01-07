@@ -431,3 +431,24 @@ body {
 .product-card .add-to-cart-btn:hover {
     background-color: #d35400;
 }
+
+/* --- Notification Badge --- */
+#notifications-icon {
+    position: relative;
+    cursor: pointer;
+}
+#notifications-icon.has-notifications::after {
+    content: attr(data-count);
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    font-weight: bold;
+}

@@ -7,22 +7,21 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION[
 }
 
 require_once '../core/db.php';
-
-// Fetch all applications from the database
-$stmt = $pdo->query("SELECT id, name, type, category, price_monthly, is_active FROM apps ORDER BY id DESC");
-$apps = $stmt->fetchAll();
 require_once '../core/csrf.php';
 
+// Fetch all products from the database
+$stmt = $pdo->query("SELECT id, name, category, price, is_active FROM products ORDER BY id DESC");
+$products = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة التطبيقات - TEKNATON OS</title>
+    <title>إدارة المنتجات - TEKNATON OS</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Additional styles for the manage page table */
+        /* Styles for the manage page table, reused from apps_manage */
         .manage-table {
             width: 100%;
             border-collapse: collapse;
@@ -42,7 +41,7 @@ require_once '../core/csrf.php';
         .manage-table tr:nth-of-type(even) {
             background-color: #f8f9fa;
         }
-        .actions a {
+        .actions a, .delete-btn {
             margin-right: 10px;
             text-decoration: none;
             color: #007bff;
@@ -51,21 +50,11 @@ require_once '../core/csrf.php';
             color: #dc3545;
         }
         .delete-btn {
-            background: none;
-            border: none;
-            padding: 0;
-            font: inherit;
-            cursor: pointer;
-            text-decoration: underline;
+            background: none; border: none; padding: 0; font: inherit; cursor: pointer; text-decoration: underline;
         }
         .add-new-btn {
-            display: inline-block;
-            margin-bottom: 20px;
-            padding: 10px 15px;
-            background-color: #28a745;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
+            display: inline-block; margin-bottom: 20px; padding: 10px 15px; background-color: #28a745;
+            color: white; text-decoration: none; border-radius: 5px;
         }
     </style>
 </head>
@@ -75,8 +64,8 @@ require_once '../core/csrf.php';
             <h2>TEKNATON OS</h2>
             <ul>
                 <li><a href="index.php">لوحة التحكم</a></li>
-                <li><a href="apps_manage.php" class="active">إدارة التطبيقات</a></li>
-                <li><a href="products_manage.php">إدارة المنتجات</a></li>
+                <li><a href="apps_manage.php">إدارة التطبيقات</a></li>
+                <li><a href="products_manage.php" class="active">إدارة المنتجات</a></li>
                 <li><a href="notifications_manage.php">إدارة الإشعارات</a></li>
                 <li><a href="subscriptions_manage.php">عرض الاشتراكات</a></li>
                 <li><a href="orders_manage.php">عرض الطلبات</a></li>
@@ -84,37 +73,35 @@ require_once '../core/csrf.php';
             </ul>
         </div>
         <div class="main-content">
-            <h1>إدارة التطبيقات</h1>
+            <h1>إدارة المنتجات</h1>
 
-            <a href="app_edit.php" class="add-new-btn">إضافة تطبيق جديد</a>
+            <a href="product_edit.php" class="add-new-btn">إضافة منتج جديد</a>
 
             <table class="manage-table">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>الاسم</th>
-                        <th>النوع</th>
                         <th>الفئة</th>
-                        <th>السعر الشهري</th>
+                        <th>السعر</th>
                         <th>الحالة</th>
                         <th>إجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($apps as $app): ?>
+                    <?php foreach ($products as $product): ?>
                     <tr>
-                        <td><?php echo $app['id']; ?></td>
-                        <td><?php echo htmlspecialchars($app['name']); ?></td>
-                        <td><?php echo htmlspecialchars($app['type']); ?></td>
-                        <td><?php echo htmlspecialchars($app['category']); ?></td>
-                        <td>$<?php echo number_format($app['price_monthly'], 2); ?></td>
-                        <td><?php echo $app['is_active'] ? 'نشط' : 'معطل'; ?></td>
+                        <td><?php echo $product['id']; ?></td>
+                        <td><?php echo htmlspecialchars($product['name']); ?></td>
+                        <td><?php echo htmlspecialchars($product['category']); ?></td>
+                        <td>$<?php echo number_format($product['price'], 2); ?></td>
+                        <td><?php echo $product['is_active'] ? 'نشط' : 'معطل'; ?></td>
                         <td class="actions">
-                            <a href="app_edit.php?id=<?php echo $app['id']; ?>">تعديل</a>
-                            <form action="app_handler.php" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من رغبتك في حذف هذا التطبيق؟');">
+                            <a href="product_edit.php?id=<?php echo $product['id']; ?>">تعديل</a>
+                            <form action="product_handler.php" method="POST" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من رغبتك في حذف هذا المنتج؟');">
                                 <?php csrf_input_field(); ?>
-                                <input type="hidden" name="id" value="<?php echo $app['id']; ?>">
-                                <button type="submit" name="delete_app" class="delete-btn">حذف</button>
+                                <input type="hidden" name="id" value="<?php echo $product['id']; ?>">
+                                <button type="submit" name="delete_product" class="delete-btn">حذف</button>
                             </form>
                         </td>
                     </tr>
