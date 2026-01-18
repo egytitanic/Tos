@@ -1,0 +1,34 @@
+<?php
+// --- TEKNATON OS Database Connection ---
+// Please update the following variables with your actual database credentials.
+
+/** @var string The hostname of your database server (usually 'localhost'). */
+$servername = "localhost";
+
+/** @var string The username for your database. */
+$username = "your_username";
+
+/** @var string The password for your database user. */
+$password = "your_password";
+
+/** @var string The name of the database you want to connect to. */
+$dbname = "your_database";
+
+// --- End of Configuration ---
+
+try {
+    // Create a new PDO instance
+    $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8mb4", $username, $password);
+
+    // Set PDO attributes
+    // 1. Throw exceptions on error for better error handling
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // 2. Fetch associative arrays by default for easier access to data
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+} catch(PDOException $e) {
+    // If connection fails, stop the script and display a generic error message.
+    // In a production environment, you should log this error instead of displaying it.
+    die("Database connection failed. Please check your configuration.");
+}
+?>
